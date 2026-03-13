@@ -9,14 +9,28 @@ use Response;
 
 class productController extends Controller
 {
-    // Display the shop window
-    public function displayGrid()
+    // Display shop window with cart total
+    public function displayGrid(Request $request)
     {
         $products = Product::all();
-        return view('products.displaygrid')->with('products', $products);
+
+        if ($request->session()->has('cart')) {
+            $cart = $request->session()->get('cart');
+            $totalQty = 0;
+            foreach ($cart as $productId => $qty) {
+                $totalQty += $qty;
+            }
+            $totalItems = $totalQty;
+        } else {
+            $totalItems = 0;
+        }
+
+        return view('products.displaygrid')
+            ->with('products', $products)
+            ->with('totalItems', $totalItems);
     }
 
-    // Add item to cart
+    // Add item to cart via AJAX
     public function additem($productid)
     {
         if (Session::has('cart')) {
@@ -38,10 +52,12 @@ class productController extends Controller
         ], 200);
     }
 
-    // Empty the cart
+    // Empty the cart via AJAX
     public function emptycart()
     {
-        Session::forget('cart');
+        if (Session::has('cart')) {
+            Session::forget('cart');
+        }
         return Response::json(['success' => true], 200);
     }
 }
