@@ -1,23 +1,16 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\productController; // ← add this line at the top
+use App\Http\Controllers\productController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+// Shop window
+Route::get('/', [productController::class, 'displayGrid'])->name('products.displaygrid');
+Route::get('product/displaygrid', [productController::class, 'displayGrid']);
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Add item to cart via AJAX
+Route::get('product/additem/{id}', [productController::class, 'additem'])
+    ->name('products.additem');
 
-// ------------------- ADD THIS -------------------
-Route::get('/product/displaygrid', [productController::class, 'displayGrid']);
-// ------------------------------------------------
+// Empty cart via AJAX
+Route::get('product/emptycart', [productController::class, 'emptycart'])
+    ->name('products.emptycart');
