@@ -2,10 +2,11 @@
 
 @section('content')
 
-{{-- Navbar with Cart Info --}}
+{{-- Navbar with Cart and Colour Filter --}}
 <div style="padding-top:1%">
     <nav class="navbar navbar-right navbar-expand-sm navbar-dark bg-dark">
         <ul class="navbar-nav ms-auto">
+            {{-- Checkout Button --}}
             <li class="nav-item">
                 <button id="checkOut"
                         onclick="window.location.href='{{ route('scorder.checkout') }}'"
@@ -15,6 +16,8 @@
                     Check Out
                 </button>
             </li>
+
+            {{-- Empty Cart Button --}}
             <li class="nav-item">
                 <button id="emptycart"
                         type="button"
@@ -23,17 +26,32 @@
                     Empty Cart
                 </button>
             </li>
+
+            {{-- Shopping Cart Icon & Total --}}
             <li class="nav-item">
                 <span style="font-size:40px;margin-right:0px;"
                       class="glyphicon glyphicon-shopping-cart navbar-btn"></span>
             </li>
             <li class="nav-item">
-                <div class="navbar-text" id="shoppingcart" style="font-size:12pt;margin-left:5px;margin-right:0px;">
+                <div class="navbar-text" id="shoppingcart"
+                     style="font-size:12pt;margin-left:5px;margin-right:0px;">
                     {{ $totalItems ?? 0 }}
                 </div>
             </li>
             <li class="nav-item">
                 <div class="navbar-text" style="font-size:14pt;margin-left:0px;">Item(s)</div>
+            </li>
+
+            {{-- Colour Filter Dropdown --}}
+            <li class="nav-item" style="margin-left:10px;">
+                <select id="colourselect" class="form-select" size="1">
+                    <option value="All">All</option>
+                    <option value="Blue">Blue</option>
+                    <option value="Red">Red</option>
+                    <option value="Green">Green</option>
+                    <option value="Yellow">Yellow</option>
+                    <option value="Orange">Orange</option>
+                </select>
             </li>
         </ul>
     </nav>
@@ -51,7 +69,8 @@
     @else
         <div class="d-flex flex-wrap align-content-start bg-light">
             @foreach($products as $product)
-                <div class="p-2 border col-4 g-3">
+                {{-- Product Card with allcolours & colour class for filtering --}}
+                <div class="p-2 border col-4 g-3 allcolours {{ $product->colour }}">
                     <div class="card text-center">
                         {{-- Card Header --}}
                         <div class="card-header d-block">
@@ -63,12 +82,13 @@
                         {{-- Card Body with Image --}}
                         <div class="card-body">
                             @php
-                                $imageUrl = match($product->name) {
-                                    'T-Shirt' => 'https://via.placeholder.com/300x200.png?text=T-Shirt',
-                                    'Sweatshirt' => 'https://via.placeholder.com/300x200.png?text=Sweatshirt',
-                                    'Hoodie' => 'https://via.placeholder.com/300x200.png?text=Hoodie',
-                                    default => 'https://via.placeholder.com/300x200.png?text=Product',
-                                };
+                                // Map product names to local images
+                                $imageMap = [
+                                    'T-Shirt' => 'images/products/tshirt.png',
+                                    'Sweatshirt' => 'images/products/sweatshirt.png',
+                                    'Hoodie' => 'images/products/hoodie.png',
+                                ];
+                                $imageUrl = asset($imageMap[$product->name] ?? 'images/products/default.png');
                             @endphp
                             <img style="width:65%; height:200px;" class="mx-auto d-block" src="{{ $imageUrl }}" alt="{{ $product->name }}">
                         </div>
@@ -94,7 +114,7 @@
     @endif
 </div>
 
-{{-- jQuery for Add / Empty Cart --}}
+{{-- jQuery for Add / Empty Cart / Colour Filter --}}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
 $(document).ready(function() {
@@ -126,6 +146,17 @@ $(document).ready(function() {
                 alert("Problem communicating with the server");
             }
         });
+    });
+
+    // Filter products by colour
+    $("#colourselect").on('change', function() {
+        var colour = $(this).find(":selected").val();
+        if (colour == 'All') {
+            $('.allcolours').show();
+        } else {
+            $('.allcolours').hide();
+            $('.' + colour).show();
+        }
     });
 
 });
